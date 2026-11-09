@@ -191,8 +191,6 @@ h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.04;margin:0;le
   .hours-line{grid-area:hours}
   .hero h1{font-size:clamp(84px,7.4vw,112px)}
   .cx-q{font-size:30px}
-  .cards{grid-template-columns:repeat(4,1fr)}
-  .c-concern{grid-template-columns:repeat(4,1fr)}
   .c-type .card{min-height:124px}
   .hero-acts .btn{flex:0 0 auto}
 }
@@ -323,6 +321,13 @@ h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.04;margin:0;le
   .quote blockquote{font-size:26px}
 }
 
+@media (min-width:1240px){
+  .cards,.c-concern{grid-template-columns:repeat(4,1fr)}
+}
+@media (min-width:1000px) and (max-width:1239px){
+  .hero-copy{grid-template-columns:minmax(0,1fr) minmax(0,340px);column-gap:48px}
+  .c-type .card{min-height:96px}
+}
 @media (prefers-reduced-motion:reduce){
   [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
