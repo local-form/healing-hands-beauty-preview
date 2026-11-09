@@ -85,7 +85,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.04;margin:0;le
 .cx-back{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 10px;margin:-6px -6px -6px 0;border:0;background:none;color:var(--cream);font-size:14px;font-weight:700;cursor:pointer;border-radius:999px}
 .cx-back svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 [hidden]{display:none!important}
-.cx-pane{animation:paneIn .55s var(--ease)}
+.consult.live .cx-pane{animation:paneIn .55s var(--ease)}
 @keyframes paneIn{from{transform:translateY(10px);opacity:.01}to{transform:none;opacity:1}}
 .cx-q{font-size:25px;color:var(--cream);margin:0 0 14px;outline:none}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -332,7 +332,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.04;margin:0;le
   [data-reveal]{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
   .glow,.blinds{animation:none}
-  .cx-pane{animation:none}
+  .consult.live .cx-pane{animation:none}
   .glass img{transition:none;transform:none}
   .glass.sheen::after{animation:none}
 }

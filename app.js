@@ -73,7 +73,7 @@
   }
 
   function go(n, focus = true) {
-    st.step = n;
+    st.step = n; cx.classList.add('live');
     panes.forEach(p => { p.hidden = +p.dataset.step !== n; });
     bars.forEach((b, i) => b.classList.toggle('on', i < n));
     $('#cx-step').textContent = `Step ${n} of 4`;
