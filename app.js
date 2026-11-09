@@ -196,6 +196,89 @@
     $('#rq-again').addEventListener('click', () => { done.hidden = true; rq.hidden = false; rq.name.focus(); });
   }
 
+  /* before / after slider: range input drives --x; one gentle sweep the first time it shows */
+  const ba = $('#ba'), rng = $('#ba-range');
+  if (ba && rng) {
+    let touched = false;
+    const setX = v => { ba.style.setProperty('--x', v + '%'); rng.value = v; rng.setAttribute('aria-valuetext', Math.round(v) + ' percent before'); };
+    rng.addEventListener('input', () => { touched = true; setX(+rng.value); });
+    if (!reduce && 'IntersectionObserver' in window) {
+      const io2 = new IntersectionObserver(es => es.forEach(e => {
+        if (!e.isIntersecting) return; io2.disconnect();
+        const keys = [[0, 50], [700, 18], [1500, 82], [2200, 50]], t0 = performance.now() + 300;
+        const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const step = now => {
+          if (touched) return;
+          const t = now - t0; if (t < 0) return requestAnimationFrame(step);
+          let i = 1; while (i < keys.length - 1 && t > keys[i][0]) i++;
+          const [ta, va] = keys[i - 1], [tb, vb] = keys[i], p = Math.min(1, Math.max(0, (t - ta) / (tb - ta)));
+          setX(va + (vb - va) * ease(p));
+          if (t < keys[keys.length - 1][0]) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }), { threshold: .5 });
+      io2.observe(ba);
+    }
+  }
+
+  /* review deck: swipe, arrows, keys; stars fill on the top card */
+  const deck = $('#deck');
+  if (deck) {
+    const cards = $$('.rcard', deck), N = cards.length, count = $('#d-count');
+    let cur = 0;
+    const lay = () => cards.forEach((c, i) => {
+      const k = (i - cur + N) % N;
+      c.classList.toggle('is-top', k === 0);
+      c.style.zIndex = N - k;
+      c.style.opacity = k > 2 ? 0 : 1;
+      c.style.transform = k === 0 ? '' : `translateY(${k * 14}px) scale(${1 - k * .05}) rotate(${k % 2 ? 2.5 : -2.5}deg)`;
+      c.setAttribute('aria-hidden', k === 0 ? 'false' : 'true');
+      c.style.pointerEvents = k === 0 ? '' : 'none';
+    });
+    let busy = false;
+    const show = () => { lay(); count.textContent = `${cur + 1} / ${N}`; };
+    const next = (dir = 1) => {
+      if (busy) return;
+      const top = cards[cur];
+      if (reduce) { cur = (cur + 1) % N; return show(); }
+      busy = true; top.style.transform = `translateX(${dir * 130}%) rotate(${dir * 18}deg)`; top.style.opacity = 0;
+      setTimeout(() => { cur = (cur + 1) % N; show(); busy = false; }, 260);
+    };
+    const prev = () => { if (busy) return; cur = (cur + N - 1) % N; show(); };
+    $('#d-next').addEventListener('click', () => next(1));
+    $('#d-prev').addEventListener('click', prev);
+    deck.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); next(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); } });
+    let sx = 0, sy = 0, dx = 0, id = null, axis = null;
+    deck.addEventListener('pointerdown', e => { const c = e.target.closest('.rcard'); if (!c || !c.classList.contains('is-top')) return; id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = 0; axis = null; });
+    deck.addEventListener('pointermove', e => {
+      if (e.pointerId !== id) return;
+      const mx = e.clientX - sx, my = e.clientY - sy;
+      if (!axis && Math.abs(mx) + Math.abs(my) > 8) { axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y'; if (axis === 'x') { cards[cur].classList.add('drag'); try { deck.setPointerCapture(id); } catch (_) {} } }
+      if (axis !== 'x') return;
+      dx = mx; cards[cur].style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
+    });
+    const end = e => {
+      if (e.pointerId !== id) return; id = null;
+      const c = cards[cur]; c.classList.remove('drag');
+      if (axis === 'x' && Math.abs(dx) > 80) next(dx > 0 ? 1 : -1); else c.style.transform = '';
+    };
+    deck.addEventListener('pointerup', end); deck.addEventListener('pointercancel', end);
+    lay();
+  }
+
+  /* 4.9 counts up once */
+  const sc = $('#score');
+  if (sc && !reduce && 'IntersectionObserver' in window) {
+    sc.textContent = '0.0';
+    const io3 = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return; io3.disconnect();
+      const t0 = performance.now(), dur = 1300;
+      const f = now => { const p = Math.min(1, (now - t0) / dur), v = 4.9 * (1 - Math.pow(1 - p, 3)); sc.textContent = v.toFixed(1); if (p < 1) requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    }), { threshold: .6 });
+    io3.observe(sc);
+  }
+
   /* reveal (standard) */
   const els = $$('[data-reveal]');
   if (reduce || !('IntersectionObserver' in window)) els.forEach(e => e.classList.add('is-visible'));
